@@ -7,7 +7,7 @@ function Dashboard() {
     const token = localStorage.getItem("token");
 
     useEffect(() => {
-        fetch("http://localhost:5000/api/documents", {
+        fetch("https://realtime-editor-e85n.onrender.com/api/documents", {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -17,7 +17,7 @@ function Dashboard() {
     }, []);
 
     const createDocument = async () => {
-        const res = await fetch("http://localhost:5000/api/documents", {
+        const res = await fetch("https://realtime-editor-e85n.onrender.com/api/documents", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

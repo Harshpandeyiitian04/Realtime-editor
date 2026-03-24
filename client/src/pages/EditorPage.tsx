@@ -3,7 +3,7 @@ import Editor from "../Editor";
 import { useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:5000");
+const socket = io("https://realtime-editor-e85n.onrender.com");
 
 function EditorPage() {
     const { id } = useParams();
@@ -35,7 +35,7 @@ function EditorPage() {
             },
         });
 
-        fetch(`http://localhost:5000/api/documents/${id}`, {
+        fetch(`https://realtime-editor-e85n.onrender.com/api/documents/${id}`, {
             headers: { Authorization: `Bearer ${token}` },
         })
             .then(async (res) => {
@@ -61,13 +61,13 @@ function EditorPage() {
         socket.on("cursor-update", setTypingUser);
         socket.emit("leave-document", id);
 
-        fetch(`http://localhost:5000/api/documents/${id}/history`, {
+        fetch(`https://realtime-editor-e85n.onrender.com/api/documents/${id}/history`, {
             headers: { Authorization: `Bearer ${token}` },
         })
             .then((res) => res.json())
             .then(setHistory);
 
-        fetch(`http://localhost:5000/api/documents/${id}/comments`, {
+        fetch(`https://realtime-editor-e85n.onrender.com/api/documents/${id}/comments`, {
             headers: { Authorization: `Bearer ${token}` },
         })
             .then((res) => res.json())
@@ -93,7 +93,7 @@ function EditorPage() {
         if (saveTimeout.current) clearTimeout(saveTimeout.current);
 
         saveTimeout.current = setTimeout(() => {
-            fetch(`http://localhost:5000/api/documents/${id}`, {
+            fetch(`https://realtime-editor-e85n.onrender.com/api/documents/${id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -105,7 +105,7 @@ function EditorPage() {
     };
 
     const handleTitleBlur = () => {
-        fetch(`http://localhost:5000/api/documents/${id}/title`, {
+        fetch(`https://realtime-editor-e85n.onrender.com/api/documents/${id}/title`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -117,7 +117,7 @@ function EditorPage() {
 
     const handleComment = async () => {
         const res = await fetch(
-            `http://localhost:5000/api/documents/${id}/comment`,
+            `https://realtime-editor-e85n.onrender.com/api/documents/${id}/comment`,
             {
                 method: "POST",
                 headers: {
@@ -130,7 +130,7 @@ function EditorPage() {
 
         const data = await res.json();
 
-        fetch(`http://localhost:5000/api/documents/${id}/comments`, {
+        fetch(`https://realtime-editor-e85n.onrender.com/api/documents/${id}/comments`, {
             headers: { Authorization: `Bearer ${token}` },
         })
             .then((res) => res.json())
@@ -142,7 +142,7 @@ function EditorPage() {
     const handleDelete = async () => {
         if (!confirm("Delete document?")) return;
 
-        await fetch(`http://localhost:5000/api/documents/${id}`, {
+        await fetch(`https://realtime-editor-e85n.onrender.com/api/documents/${id}`, {
             method: "DELETE",
             headers: { Authorization: `Bearer ${token}` },
         });
@@ -172,7 +172,7 @@ function EditorPage() {
 
     const handleShare = async () => {
         const res = await fetch(
-            `http://localhost:5000/api/documents/${id}/share`,
+            `https://realtime-editor-e85n.onrender.com/api/documents/${id}/share`,
             {
                 method: "POST",
                 headers: {
@@ -191,7 +191,7 @@ function EditorPage() {
     };
 
     const handleSave = async () => {
-        await fetch(`http://localhost:5000/api/documents/${id}`, {
+        await fetch(`https://realtime-editor-e85n.onrender.com/api/documents/${id}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -204,7 +204,7 @@ function EditorPage() {
     };
 
     const handleSaveAs = async () => {
-        const res = await fetch(`http://localhost:5000/api/documents`, {
+        const res = await fetch(`https://realtime-editor-e85n.onrender.com/api/documents`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
