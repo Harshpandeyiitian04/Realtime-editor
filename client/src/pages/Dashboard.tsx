@@ -36,15 +36,52 @@ function Dashboard() {
             <button onClick={createDocument}>➕ New Document</button>
             <ul>
                 {documents.map((doc) => (
-                    <li
+                    <div
                         key={doc.id}
-                        style={{ cursor: "pointer", marginTop: 10 }}
                         onClick={() => navigate(`/editor/${doc.id}`)}
+                        style={{
+                            padding: 10,
+                            marginTop: 10,
+                            background: "white",
+                            cursor: "pointer",
+                            borderRadius: 5,
+                        }}
                     >
-                        {doc.title || "Untitled"}
-                    </li>
+                        <strong>{doc.title}</strong>
+
+                        <span
+                            style={{
+                                color:
+                                    doc.role === "owner"
+                                        ? "green"
+                                        : doc.role === "editor"
+                                            ? "blue"
+                                            : "gray",
+                            }}
+                        >
+                            {doc.role}
+                        </span>
+                    </div>
                 ))}
             </ul>
+            <button
+                onClick={() => {
+                    localStorage.clear();
+                    navigate("/login");
+                }}
+                style={{
+                    position: "absolute",
+                    top: 20,
+                    right: 20,
+                    background: "red",
+                    color: "white",
+                    padding: "6px 12px",
+                    border: "none",
+                    cursor: "pointer",
+                }}
+            >
+                Logout
+            </button>
         </div>
     );
 }

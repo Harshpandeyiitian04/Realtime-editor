@@ -45,7 +45,18 @@ const getUserDocuments = async (req, res) => {
     const userId = req.user.userId;
 
     const result = await pool.query(
-      "SELECT * FROM documents WHERE owner_id = $1 ORDER BY created_at DESC",
+      `
+      SELECT d.*, 
+        CASE 
+          WHEN d.owner_id = $1 THEN 'owner'
+          ELSE p.role
+        END as role
+      FROM documents d
+      LEFT JOIN document_permissions p
+      ON d.id = p.document_id AND p.user_id = $1
+      WHERE d.owner_id = $1 OR p.user_id = $1
+      ORDER BY d.created_at DESC
+      `,
       [userId],
     );
 

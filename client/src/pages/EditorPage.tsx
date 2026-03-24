@@ -16,6 +16,8 @@ function EditorPage() {
     const [history, setHistory] = useState<any[]>([]);
     const [comment, setComment] = useState("");
     const [comments, setComments] = useState<any[]>([]);
+    const [shareEmail, setShareEmail] = useState("");
+    const [shareRole, setShareRole] = useState("viewer");
 
     const token = localStorage.getItem("token");
     const saveTimeout = useRef<any>(null);
@@ -57,6 +59,7 @@ function EditorPage() {
         socket.on("receive-changes", setContent);
         socket.on("active-users", setUsers);
         socket.on("cursor-update", setTypingUser);
+        socket.emit("leave-document", id);
 
         fetch(`http://localhost:5000/api/documents/${id}/history`, {
             headers: { Authorization: `Bearer ${token}` },
@@ -148,11 +151,74 @@ function EditorPage() {
     };
 
     const timeAgo = (date: string) => {
-        const seconds = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
-        if (seconds < 60) return "just now";
-        if (seconds < 3600) return Math.floor(seconds / 60) + " min ago";
-        if (seconds < 86400) return Math.floor(seconds / 3600) + " hrs ago";
+        const now = new Date().getTime();
+        const past = new Date(date).getTime();
+
+        const seconds = Math.floor((now - past) / 1000);
+
+        if (seconds < 10) return "just now";
+        if (seconds < 60) return seconds + " sec ago";
+
+        if (seconds < 3600) {
+            return Math.floor(seconds / 60) + " min ago";
+        }
+
+        if (seconds < 86400) {
+            return Math.floor(seconds / 3600) + " hrs ago";
+        }
+
         return Math.floor(seconds / 86400) + " days ago";
+    };
+
+    const handleShare = async () => {
+        const res = await fetch(
+            `http://localhost:5000/api/documents/${id}/share`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    email: shareEmail,
+                    role: shareRole,
+                }),
+            }
+        );
+
+        const data = await res.json();
+        alert(data.message || data.error);
+    };
+
+    const handleSave = async () => {
+        await fetch(`http://localhost:5000/api/documents/${id}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ content }),
+        });
+
+        alert("Saved!");
+    };
+
+    const handleSaveAs = async () => {
+        const res = await fetch(`http://localhost:5000/api/documents`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+                title: title + " (Copy)",
+                content: content,
+            }),
+        });
+
+        const data = await res.json();
+
+        navigate(`/editor/${data.id}`);
     };
 
     return (
@@ -160,7 +226,9 @@ function EditorPage() {
             <div style={{ width: "250px", padding: 10, background: "#f1f1f1" }}>
                 <h4>👥 Active Users</h4>
                 {users.map((u, i) => (
-                    <div key={i}>{u.email} ({u.role})</div>
+                    <div key={i}>
+                        {u.email} - <b>{u.role}</b>
+                    </div>
                 ))}
 
                 <h4>Typing</h4>
@@ -195,10 +263,45 @@ function EditorPage() {
                         onChange={(e) => setTitle(e.target.value)}
                         onBlur={handleTitleBlur}
                     />
+                    <button onClick={handleSave}>Save</button>
+                    <button onClick={handleSaveAs}>Save As</button>
 
                     {userRole !== "viewer" && (
                         <button onClick={handleDelete}>Delete</button>
                     )}
+                    <input
+                        placeholder="Share email"
+                        value={shareEmail}
+                        onChange={(e) => setShareEmail(e.target.value)}
+                    />
+
+                    <select
+                        value={shareRole}
+                        onChange={(e) => setShareRole(e.target.value)}
+                    >
+                        <option value="viewer">Viewer</option>
+                        <option value="editor">Editor</option>
+                    </select>
+
+                    <button onClick={handleShare}>Share</button>
+                    <button
+                        onClick={() => {
+                            localStorage.clear();
+                            navigate("/login");
+                        }}
+                        style={{
+                            position: "absolute",
+                            top: 20,
+                            right: 20,
+                            background: "red",
+                            color: "white",
+                            padding: "6px 12px",
+                            border: "none",
+                            cursor: "pointer",
+                        }}
+                    >
+                        Logout
+                    </button>
                 </div>
                 <div style={{ padding: 20 }}>
                     <Editor
