@@ -116,27 +116,35 @@ function EditorPage() {
     };
 
     const handleComment = async () => {
-        const res = await fetch(
-            `https://realtime-editor-e85n.onrender.com/api/documents/${id}/comment`,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({ text: comment }),
-            }
-        );
+        try {
+            const res = await fetch(
+                `https://realtime-editor-e85n.onrender.com/api/documents/${id}/comment`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ text: comment }),
+                }
+            );
 
-        const data = await res.json();
+            if (!res.ok) throw new Error("Failed to add comment");
 
-        fetch(`https://realtime-editor-e85n.onrender.com/api/documents/${id}/comments`, {
-            headers: { Authorization: `Bearer ${token}` },
-        })
-            .then((res) => res.json())
-            .then(setComments);
+            const commentsRes = await fetch(
+                `https://realtime-editor-e85n.onrender.com/api/documents/${id}/comments`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
 
-        setComment("");
+            const commentsData = await commentsRes.json();
+            setComments(commentsData);
+
+            setComment("");
+        } catch (err) {
+            console.error(err);
+        }
     };
 
     const handleDelete = async () => {
