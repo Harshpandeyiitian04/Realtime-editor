@@ -14,7 +14,10 @@ const app = express();
 
 app.use(
   cors({
-    origin: "*",
+    origin: [
+      "http://localhost:5173",
+      "https://realtime-editor-beta.vercel.app",
+    ],
     credentials: true,
   }),
 );
@@ -25,7 +28,10 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: [
+      "http://localhost:5173",
+      "https://realtime-editor-beta.vercel.app",
+    ],
     methods: ["GET", "POST", "PUT"],
   },
 });
